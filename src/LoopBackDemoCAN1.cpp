@@ -1,7 +1,6 @@
 #include <ACAN_T4.h>
-// #include <signalsMessage.h>
 #include <CANSignal.h>
-// #include <baseSignal.h>
+#include <CANCounterSignal.h>
 #include <Arduino.h>
 
 void printFrame(CANMessage &frame)
@@ -30,9 +29,10 @@ void printFrame(CANMessage &frame)
 }
 
 Signal<float> test("Temp1_Mod1", "°C", 500, 25, -40, 100);
-//CANSignal<int> mySignal("Speed", "km/h", 5000, 0, 0, 250, 0, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-// signalsMessage msgBMWi3_x120(0x120);
-// CANSignal<float> CellVoltage0("CellVoltage0", "V", 300, 3.2, 0, 5, 0, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+// CANSignal<int> mySignal("Speed", "km/h", 5000, 0, 0, 250, 0, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+//  signalsMessage msgBMWi3_x120(0x120);
+CANSignal<float> CellVoltage0("CellVoltage0", "V", 300, 3.2, 0, 5, 0, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+CANCounterSignal<u_int8_t> Counter("Counter", "", 300, 0, 0, 255, 48, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, 2, 1);
 
 // Signal CellVoltage1("CellVoltage1", 16, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, "V", 200, 20, 0, 5);
 // Signal CellVoltage2("CellVoltage2", 32, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, "V", 200, 20, 0, 5);
@@ -121,16 +121,14 @@ void loop()
     // voltageSignal.update(message);
     if (message.id == 0x120)
     {
-      // CellVoltage0.update(message);
-      // CellVoltage0.print();
-      // CellVoltage1.update(message);
-      // CellVoltage1.print();
-      // CellVoltage2.update(message);
-      // CellVoltage2.print();
-      // Counter.update(message);
-      // Counter.print();
-      // CRC.update(message);
-      // CRC.print();
+      if (Counter.updateAndCheck(message))
+      {
+        Counter.print();
+        CellVoltage0.update(message);
+        CellVoltage0.print();
+        CRC.update(message);
+        CRC.print();
+      }
     }
     printFrame(message);
   }

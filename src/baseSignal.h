@@ -1,6 +1,9 @@
 #pragma once
 #include "Arduino.h"
 
+//Usage
+//Signal<float> test("Temp1_Mod1", "°C", 500, 25, -40, 100);
+
 #define HandleFault(faulttype)
 
 template <typename T>
@@ -204,9 +207,7 @@ public:
     // ***
     T get()
     {
-        T returnValue;
-        returnValue = this->_defaultValue;
-        return returnValue;
+        return _value;
     }
 
     // ***
