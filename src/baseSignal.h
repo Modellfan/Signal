@@ -4,7 +4,7 @@
 #define HandleFault(faulttype)
 
 template <typename T>
-class signal
+class Signal
 {
 public:
     /**
@@ -17,7 +17,7 @@ public:
      * @param minValue The max value of the signal
      * @param maxValue The min value of the signal
      */
-    signal(const char *name, const char *unit, u_int32_t aliveTimeout, T defaultValue, T minValue, T maxValue)
+    Signal(const char *name, const char *unit, u_int32_t aliveTimeout, T defaultValue, T minValue, T maxValue)
     {
         this->_defaultValue = defaultValue;
         this->_name = name;
@@ -258,6 +258,17 @@ public:
     T getDefaultValue()
     {
         return this->_defaultValue;
+    }
+
+    void print()
+    {
+        Serial.print(_name);
+        Serial.print(": ");
+        Serial.print(_value);
+        Serial.print(" ");
+        Serial.print(_unit);
+        Serial.print(" | modiefied since reset: ");
+        Serial.println(_modifiedSinceReset ? "yes" : "no");
     }
 
 private:
