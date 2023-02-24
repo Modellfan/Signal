@@ -256,6 +256,11 @@ public:
         }
     }
 
+    boolean modiefiedSinceResetz()
+    {
+        return _modifiedSinceReset;
+    }
+
     T getDefaultValue()
     {
         return this->_defaultValue;

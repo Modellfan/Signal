@@ -69,6 +69,11 @@ public:
         }
     }
 
+    u_int8_t getBitLen()
+    {
+        return _bit_len;
+    }
+
 private:
     const uint8_t _start_bit;      // Starting bit of the signal in the message
     const uint8_t _bit_len;        // Length of the signal in bits

@@ -1,7 +1,11 @@
 #include <ACAN_T4.h>
 #include <CANSignal.h>
 #include <CANCounterSignal.h>
+#include <CANCRCSignal.h>
 #include <Arduino.h>
+#include <CANMessageSignals.h>
+
+#include <CRC8.h>
 
 void printFrame(CANMessage &frame)
 {
@@ -28,26 +32,22 @@ void printFrame(CANMessage &frame)
   Serial.println();
 }
 
-Signal<float> test("Temp1_Mod1", "°C", 500, 25, -40, 100);
-// CANSignal<int> mySignal("Speed", "km/h", 5000, 0, 0, 250, 0, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-//  signalsMessage msgBMWi3_x120(0x120);
-CANSignal<float> CellVoltage0("CellVoltage0", "V", 300, 3.2, 0, 5, 0, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-CANCounterSignal<u_int8_t> Counter("Counter", "", 300, 0, 0, 255, 48, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, 2, 1);
 
-// Signal CellVoltage1("CellVoltage1", 16, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, "V", 200, 20, 0, 5);
-// Signal CellVoltage2("CellVoltage2", 32, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, "V", 200, 20, 0, 5);
-// Signal Counter("Counter", 48, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, "", 200, 0, 0, 1);
-// Signal CRC("CRC", 56, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED, "", 200, 0, 0, 1);
+CANMesSig msgBMWi3_Battery_x120(0x120);
+CANSignal<float> Mod0_Volt0("Mod0_Volt0", "V", 300, 3.2, 0, 5, 0, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+CANSignal<float> Mod0_Volt1("Mod0_Volt1", "V", 300, 3.2, 0, 5, 16, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+CANSignal<float> Mod0_Volt2("Mod0_Volt2", "V", 300, 3.2, 0, 5, 32, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+CANCounterSignal<u_int8_t> Counter_0x120("Counter_0x120", "", 300, 0, 0, 255, 48, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+CANCRCSignal<u_int8_t> CRC_0x120("CRC_0x120", "", 300, 0, 0, 255, 56, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+
+
 // msgBMWi3_x120.addSignal(CellVoltage0);
-
-// Signal voltageSignal("Voltage", 0, 16, 0.1, -10.0, Endianess::SIGNAL_BIG_ENDIAN, Sign::SIGNAL_SIGNED, "V", 0.0, 60.0, 0.0, 0.0);
-// signalsMessage msgBMWi3_x120(0x120,voltageSignal);
 
 void setup()
 {
-
+  crc8.begin();
   pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(500000);
   while (!Serial)
   {
     delay(50);
@@ -115,21 +115,23 @@ void loop()
   if (ACAN_T4::can1.receive(message))
   {
     gReceivedCount += 1;
-    Serial.print("Received: ");
-    Serial.println(gReceivedCount);
+    // Serial.print("Received: ");
+    // Serial.println(gReceivedCount);
     // msgBMWi3_x120.updateSignals(message);
     // voltageSignal.update(message);
-    if (message.id == 0x120)
-    {
-      if (Counter.updateAndCheck(message))
+    // if (message.id == 0x120)
+    // {
+      if (CRC.unpackAndCheck(message))
       {
-        Counter.print();
-        CellVoltage0.update(message);
-        CellVoltage0.print();
-        CRC.update(message);
-        CRC.print();
+        if (Counter.unpackAndCheck(message))
+        {
+          // CellVoltage0.update(message);
+          // CellVoltage0.print();
+          // CRC.update(message);
+          // CRC.print();
+        }
       }
-    }
-    printFrame(message);
+    // }
+    // printFrame(message);
   }
 }

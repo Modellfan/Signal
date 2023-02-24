@@ -1,12 +1,12 @@
 #pragma once
 #include <ACAN_T4.h>
-#include <signals.h>
+#include <baseSignal.h>
 
 #define CFG_MAX_SIGNALS 8
 
-class signalsMessage {
+class CANMesSig {
  public:
-  signalsMessage(uint32_t id);
+  CANMesSig(uint32_t id);
   void updateSignals(const CANMessage& msg);
   void addSignal(Signal *signal);
   void removeSignal(Signal *signal);

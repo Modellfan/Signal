@@ -43,7 +43,20 @@ public:
         _inSync = false;
     }
 
-    boolean updateAndCheck(const CANMessage &msg)
+    CANCounterSignal(const char *name, const char *unit, u_int32_t aliveTimeout, T defaultValue, T minValue, T maxValue,
+                     const uint8_t start_bit, const uint8_t bit_len, const float scale,
+                     const float offset, const sigEndianess endianess, const sigSign sign) : CANSignal<T>(name, unit, aliveTimeout, defaultValue, minValue, maxValue,
+                                                                                                          start_bit, bit_len, scale,
+                                                                                                          offset, endianess, sign),
+                                                                                             _syncCounter(2u),
+                                                                                             _maxDeltaCounterInit(1u)
+    {
+        _counter = 0;
+        _syncCallsCounter = 0;
+        _inSync = false;
+    }
+
+    boolean unpackAndCheck(const CANMessage &msg)
     {
         this->update(msg);
 
@@ -63,9 +76,9 @@ public:
             return _inSync;
         }
         currentCounter = currentCounter >> 4; // Shift low bits to right
-        if (currentCounter == 0)              // Make it 16 if zero to capture jump back from 15 to 0. Value 16 is never reached
+        if (currentCounter == 0) // Make it 15 if zero to capture jump back from 14 to 0. Value 16 is never reached
         {
-            currentCounter = 16;
+            currentCounter = 15;
         }
 
         if (_inSync) // When we are in synchronization
@@ -103,6 +116,8 @@ public:
         }
 
         _counter = currentCounter % 16; // Set it to to zero if 16 or to the remainder by 16
+        //Serial.print(" Counter in sync: ");
+        //Serial.println(_inSync);
         return _inSync;
     }
 
