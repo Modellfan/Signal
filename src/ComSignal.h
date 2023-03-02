@@ -4,7 +4,7 @@
 // Usage
 // Signal<float> test("Temp1_Mod1", "°C", 500, 25, -40, 100);
 
-#define DET_REPORTERROR(Error_Sender, Error_ID);
+#define DET_REPORTERROR(Error_Sender, Error_ID) ;
 
 typedef enum
 {
@@ -21,6 +21,17 @@ typedef enum
     // COM_SINT64,
     COM_FLOAT
 } Com_SignalType;
+
+union Com_SignalValueType {
+  boolean booleanValue;
+  uint8_t ui8;
+  uint16_t uint16;
+  uint32_t uint32;
+  int8_t sint8;
+  int16_t sint16;
+  int32_t sint32;
+  float floatValue;
+};
 
 #define COM_SIGNALTYPE_UNSIGNED FALSE
 #define COM_SIGNALTYPE_SIGNED TRUE
@@ -42,6 +53,7 @@ public:
 
         this->_name = name;
         this->_unit = unit;
+        this->_type = signalType;
 
         this->_aliveTimeout = aliveTimeout;
         this->_firstAliveTimeout = firstAliveTimeout;
@@ -91,6 +103,8 @@ public:
     {
         bool isBelow = false;
         bool isAbove = false;
+        Serial.println(value);
+        Serial.println((float)value);
         switch (_type)
         {
         case COM_SINT8:
@@ -277,7 +291,14 @@ public:
             Serial.print((uint32_t)_value);
             break;
         case COM_FLOAT:
-            Serial.print((float)_value);
+            union FloatToUint32 // Might be also done in less lines with reinterprete_cast
+            {
+                float f;
+                uint32_t i;
+            };
+            FloatToUint32 converter;
+            converter.i = _value;
+            Serial.print(converter.f);
             break;
         case COM_BOOLEAN:
             Serial.print(((boolean)_value) ? "yes" : "no");
