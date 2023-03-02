@@ -1,11 +1,13 @@
 #include <ACAN_T4.h>
-#include <CANSignal.h>
-#include <CANCounterSignal.h>
-#include <CANCRCSignal.h>
+// #include <CANSignal.h>
+// #include <CANCounterSignal.h>
+// #include <CANCRCSignal.h>
 #include <Arduino.h>
-#include <CANMessageSignals.h>
-
-#include <CRC8.h>
+#include <ComSignal.h>
+#include <Pdu.h>
+// #include <E2E_P02.h>
+//  #include <CANMessageSignals.h>
+// #include <CRC8.h>
 
 void printFrame(CANMessage &frame)
 {
@@ -33,19 +35,19 @@ void printFrame(CANMessage &frame)
 }
 
 
-CANMesSig msgBMWi3_Battery_x120(0x120);
-CANSignal<float> Mod0_Volt0("Mod0_Volt0", "V", 300, 3.2, 0, 5, 0, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-CANSignal<float> Mod0_Volt1("Mod0_Volt1", "V", 300, 3.2, 0, 5, 16, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-CANSignal<float> Mod0_Volt2("Mod0_Volt2", "V", 300, 3.2, 0, 5, 32, 16, 0.001, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-CANCounterSignal<u_int8_t> Counter_0x120("Counter_0x120", "", 300, 0, 0, 255, 48, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
-CANCRCSignal<u_int8_t> CRC_0x120("CRC_0x120", "", 300, 0, 0, 255, 56, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+PduSignal Mod0_Volt0(COM_FLOAT, "Mod0_Volt0", "V", 300, 2000, 3.2, 0, 5, 0, 16, 0.001, 0, COM_LITTLE_ENDIAN, COM_UNSIGNED);
+PduSignal Mod0_Volt1(COM_FLOAT, "Mod0_Volt0", "V", 300, 2000, 3.2, 0, 5, 16, 16, 0.001, 0, COM_LITTLE_ENDIAN, COM_UNSIGNED);
+PduSignal Mod0_Volt2(COM_FLOAT, "Mod0_Volt0", "V", 300, 2000, 3.2, 0, 5, 32, 16, 0.001, 0, COM_LITTLE_ENDIAN, COM_UNSIGNED);
+Pdu BMWi3_Battery_Module_0_x120(0x120, &Mod0_Volt0, &Mod0_Volt1, &Mod0_Volt2);
 
+// CANCounterSignal<u_int8_t> Counter_0x120("Counter_0x120", "", 300, 0, 0, 255, 48, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
+// CANCRCSignal<u_int8_t> CRC_0x120("CRC_0x120", "", 300, 0, 0, 255, 56, 8, 1, 0, sigEndianess::sigLITTLE_ENDIAN, sigSign::sigUNSIGNED);
 
-// msgBMWi3_x120.addSignal(CellVoltage0);
 
 void setup()
 {
-  crc8.begin();
+    
+  // crc8.begin();
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(500000);
   while (!Serial)
@@ -115,22 +117,24 @@ void loop()
   if (ACAN_T4::can1.receive(message))
   {
     gReceivedCount += 1;
+    BMWi3_Battery_Module_0_x120.unpack(message);
+    Mod0_Volt0.print();
     // Serial.print("Received: ");
     // Serial.println(gReceivedCount);
     // msgBMWi3_x120.updateSignals(message);
     // voltageSignal.update(message);
     // if (message.id == 0x120)
     // {
-      if (CRC.unpackAndCheck(message))
-      {
-        if (Counter.unpackAndCheck(message))
-        {
-          // CellVoltage0.update(message);
-          // CellVoltage0.print();
-          // CRC.update(message);
-          // CRC.print();
-        }
-      }
+    // if (CRC.unpackAndCheck(message))
+    // {
+    //   if (Counter.unpackAndCheck(message))
+    //   {
+    //     // CellVoltage0.update(message);
+    //     // CellVoltage0.print();
+    //     // CRC.update(message);
+    //     // CRC.print();
+    //   }
+    // }
     // }
     // printFrame(message);
   }
