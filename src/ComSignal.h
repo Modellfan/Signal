@@ -22,16 +22,6 @@ typedef enum
     COM_FLOAT
 } Com_SignalType;
 
-union Com_SignalValueType {
-  boolean booleanValue;
-  uint8_t ui8;
-  uint16_t uint16;
-  uint32_t uint32;
-  int8_t sint8;
-  int16_t sint16;
-  int32_t sint32;
-  float floatValue;
-};
 
 #define COM_SIGNALTYPE_UNSIGNED FALSE
 #define COM_SIGNALTYPE_SIGNED TRUE
@@ -48,7 +38,7 @@ union Com_SignalValueType {
 class ComSignal
 {
 public:
-    ComSignal(Com_SignalType signalType, const char *name, const char *unit, const u_int32_t aliveTimeout, const u_int32_t firstAliveTimeout, const u_int32_t defaultValue, const u_int32_t minValue, const u_int32_t maxValue)
+    ComSignal(Com_SignalType signalType, const char *name, const char *unit, const u_int32_t aliveTimeout, const u_int32_t firstAliveTimeout, const float defaultValue, const float minValue, const float maxValue)
     {
 
         this->_name = name;
@@ -88,7 +78,7 @@ public:
      *
      * @return u_int32_t
      */
-    u_int32_t get()
+    float get()
     {
         return _value;
     }
@@ -99,54 +89,52 @@ public:
      * @param value
      * @return u_int32_t
      */
-    u_int32_t set(u_int32_t value)
+    float set(float value)
     {
         bool isBelow = false;
         bool isAbove = false;
-        Serial.println(value);
-        Serial.println((float)value);
         switch (_type)
         {
         case COM_SINT8:
-            if ((int8_t)value < (int8_t)_minValue)
+            if (value.sint8 < _minValue.sint8)
                 isBelow = true;
-            else if ((int8_t)value > (int8_t)_maxValue)
+            else if (value.sint8 > (int8_t)_maxValue.sint8)
                 isAbove = true;
             break;
-        case COM_UINT8:
-            if ((uint8_t)value < (uint8_t)_minValue)
-                isBelow = true;
-            else if ((uint8_t)value > (uint8_t)_maxValue)
-                isAbove = true;
-            break;
-        case COM_SINT16:
-            if ((int16_t)value < (int16_t)_minValue)
-                isBelow = true;
-            else if ((int16_t)value > (int16_t)_maxValue)
-                isAbove = true;
-            break;
-        case COM_UINT16:
-            if ((uint16_t)value < (uint16_t)_minValue)
-                isBelow = true;
-            else if ((uint16_t)value > (uint16_t)_maxValue)
-                isAbove = true;
-            break;
-        case COM_SINT32:
-            if ((int32_t)value < (int32_t)_minValue)
-                isBelow = true;
-            else if ((int32_t)value > (int32_t)_maxValue)
-                isAbove = true;
-            break;
-        case COM_UINT32:
-            if ((uint32_t)value < (uint32_t)_minValue)
-                isBelow = true;
-            else if ((uint32_t)value > (uint32_t)_maxValue)
-                isAbove = true;
-            break;
+        // case COM_UINT8:
+        //     if ((uint8_t)value < (uint8_t)_minValue)
+        //         isBelow = true;
+        //     else if ((uint8_t)value > (uint8_t)_maxValue)
+        //         isAbove = true;
+        //     break;
+        // case COM_SINT16:
+        //     if ((int16_t)value < (int16_t)_minValue)
+        //         isBelow = true;
+        //     else if ((int16_t)value > (int16_t)_maxValue)
+        //         isAbove = true;
+        //     break;
+        // case COM_UINT16:
+        //     if ((uint16_t)value < (uint16_t)_minValue)
+        //         isBelow = true;
+        //     else if ((uint16_t)value > (uint16_t)_maxValue)
+        //         isAbove = true;
+        //     break;
+        // case COM_SINT32:
+        //     if ((int32_t)value < (int32_t)_minValue)
+        //         isBelow = true;
+        //     else if ((int32_t)value > (int32_t)_maxValue)
+        //         isAbove = true;
+        //     break;
+        // case COM_UINT32:
+        //     if ((uint32_t)value < (uint32_t)_minValue)
+        //         isBelow = true;
+        //     else if ((uint32_t)value > (uint32_t)_maxValue)
+        //         isAbove = true;
+        //     break;
         case COM_FLOAT:
-            if ((float)value < (float)_minValue)
+            if (value.floatValue < _minValue.floatValue)
                 isBelow = true;
-            else if ((float)value > (float)_maxValue)
+            else if (value.floatValue > _maxValue.floatValue)
                 isAbove = true;
             break;
         case COM_BOOLEAN:
@@ -178,7 +166,7 @@ public:
      * @param value Sets the value of the signal unprotected. Needed for later failure injection testing
      * @return u_int32_t
      */
-    u_int32_t unprotectedSet(u_int32_t const &value)
+    float unprotectedSet(float const &value)
     {
         this->_value = value;
         this->_validSignal = true;
@@ -196,7 +184,7 @@ public:
         return _validSignal;
     }
 
-    u_int32_t getDefaultValue()
+    Com_SignalValueType getDefaultValue()
     {
         return this->_defaultValue;
     }
@@ -211,59 +199,59 @@ public:
         return SignalTypeToSize(_type);
     }
 
-    int8_t set_COM_SINT8(int8_t value)
-    {
-        return (int8_t)set((uint32_t)value);
-    }
-    int8_t get_COM_SINT8()
-    {
-        return (int8_t)get();
-    }
+    // int8_t set_COM_SINT8(int8_t value)
+    // {
+    //     return (int8_t)set((uint32_t)value);
+    // }
+    // int8_t get_COM_SINT8()
+    // {
+    //     return (int8_t)get();
+    // }
 
-    uint8_t set_COM_UINT8(uint8_t value)
-    {
-        return (uint8_t)set((uint32_t)value);
-    }
-    uint8_t get_COM_UINT8()
-    {
-        return (uint8_t)get();
-    }
+    // uint8_t set_COM_UINT8(uint8_t value)
+    // {
+    //     return (uint8_t)set((uint32_t)value);
+    // }
+    // uint8_t get_COM_UINT8()
+    // {
+    //     return (uint8_t)get();
+    // }
 
-    int16_t set_COM_SINT16(int16_t value)
-    {
-        return (int16_t)set((uint32_t)value);
-    }
-    int16_t get_COM_SINT16()
-    {
-        return (int16_t)get();
-    }
+    // int16_t set_COM_SINT16(int16_t value)
+    // {
+    //     return (int16_t)set((uint32_t)value);
+    // }
+    // int16_t get_COM_SINT16()
+    // {
+    //     return (int16_t)get();
+    // }
 
-    uint16_t set_COM_UINT16(uint16_t value)
-    {
-        return (uint16_t)set((uint32_t)value);
-    }
-    uint16_t get_COM_UINT16()
-    {
-        return (uint16_t)get();
-    }
+    // uint16_t set_COM_UINT16(uint16_t value)
+    // {
+    //     return (uint16_t)set((uint32_t)value);
+    // }
+    // uint16_t get_COM_UINT16()
+    // {
+    //     return (uint16_t)get();
+    // }
 
-    int32_t set_COM_SINT32(int32_t value)
-    {
-        return (int32_t)set((uint32_t)value);
-    }
-    int32_t get_COM_SINT32()
-    {
-        return (int32_t)get();
-    }
+    // int32_t set_COM_SINT32(int32_t value)
+    // {
+    //     return (int32_t)set((uint32_t)value);
+    // }
+    // int32_t get_COM_SINT32()
+    // {
+    //     return (int32_t)get();
+    // }
 
-    uint32_t set_COM_UINT32(uint32_t value)
-    {
-        return (uint32_t)set((uint32_t)value);
-    }
-    uint32_t get_COM_UINT32()
-    {
-        return (uint32_t)get();
-    }
+    // uint32_t set_COM_UINT32(uint32_t value)
+    // {
+    //     return (uint32_t)set((uint32_t)value);
+    // }
+    // uint32_t get_COM_UINT32()
+    // {
+    //     return (uint32_t)get();
+    // }
 
     void print()
     {
@@ -272,36 +260,29 @@ public:
 
         switch (_type)
         {
-        case COM_SINT8:
-            Serial.print((int8_t)_value);
-            break;
-        case COM_UINT8:
-            Serial.print((uint8_t)_value);
-            break;
-        case COM_SINT16:
-            Serial.print((int16_t)_value);
-            break;
-        case COM_UINT16:
-            Serial.print((uint16_t)_value);
-            break;
-        case COM_SINT32:
-            Serial.print((int32_t)_value);
-            break;
-        case COM_UINT32:
-            Serial.print((uint32_t)_value);
-            break;
+        // case COM_SINT8:
+        //     Serial.print((int8_t)_value);
+        //     break;
+        // case COM_UINT8:
+        //     Serial.print((uint8_t)_value);
+        //     break;
+        // case COM_SINT16:
+        //     Serial.print((int16_t)_value);
+        //     break;
+        // case COM_UINT16:
+        //     Serial.print((uint16_t)_value);
+        //     break;
+        // case COM_SINT32:
+        //     Serial.print((int32_t)_value);
+        //     break;
+        // case COM_UINT32:
+        //     Serial.print((uint32_t)_value);
+        //     break;
         case COM_FLOAT:
-            union FloatToUint32 // Might be also done in less lines with reinterprete_cast
-            {
-                float f;
-                uint32_t i;
-            };
-            FloatToUint32 converter;
-            converter.i = _value;
-            Serial.print(converter.f);
+            Serial.print(_value.floatValue);
             break;
-        case COM_BOOLEAN:
-            Serial.print(((boolean)_value) ? "yes" : "no");
+        // case COM_BOOLEAN:
+        //     Serial.print(((boolean)_value) ? "yes" : "no");
         }
 
         Serial.print(" ");
@@ -312,10 +293,10 @@ public:
     }
 
 private:
-    u_int32_t _value;        // Current value of the signal
-    u_int32_t _defaultValue; // Default value of the signal
-    u_int32_t _minValue;     // Minimum value of the signal
-    u_int32_t _maxValue;     // Maximum value of the signal
+    float _value;        // Current value of the signal
+    float _defaultValue; // Default value of the signal
+    float _minValue;     // Minimum value of the signal
+    float _maxValue;     // Maximum value of the signal
 
     Com_SignalType _type;
 
